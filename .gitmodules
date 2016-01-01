@@ -1,0 +1,3 @@
+[submodule "liblept"]
+	path = liblept
+	url = git@github.com:zzydog/leptonica.git
