@@ -17,8 +17,8 @@ if (${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_BINARY_DIR})
     )
 endif()
 
-set(EXECUTABLE_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${EXECUTABLE_OUTPUT_PATH}")
+set(CMAKE_BINARY_OUTPUT_PATH "${CMAKE_BINARY_DIR}/bin")
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_OUTPUT_PATH}")
 set(CMAKE_MODULE_PATH "${CMAKE_MODULE_PATH};${CMAKE_SOURCE_DIR}/cmake")
 
 # Use solution folders.
@@ -34,14 +34,9 @@ set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "CMake Targets")
 enable_testing()
 enable_language(C)
 
-set(AUTOCONFIG ${CMAKE_BINARY_DIR}/config_auto.h)
-set(AUTOCONFIG_SRC ${CMAKE_BINARY_DIR}/config_auto.h.in)
-
 include(Configure)
 
 set(INCLUDE_DIR ${CMAKE_SOURCE_DIR}/api)
-
-configure_file(${AUTOCONFIG_SRC} ${AUTOCONFIG} @ONLY)
 
 include_directories(${CMAKE_BINARY_DIR} ${CMAKE_SOURCE_DIR})
 
@@ -55,23 +50,25 @@ configure_file(
 
 
 ###############################################################################
-# compiler and linker
+# compiler and linker 
 ###############################################################################
-
-if (WIN32)
-	if (MSVC)
-		add_definitions(-D_SCL_SECURE_NO_WARNINGS)
-		add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
-		set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W0")
-	endif()
-endif()
 
 if (CYGWIN)
 	add_definitions(-D__CYGWIN__)
 endif()
 
+if (MSVC)
+	add_definitions(-D_SCL_SECURE_NO_WARNINGS)
+	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
+endif()
+
 if (UNIX)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++11")
+endif()
+
+if (MINGW)
 	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++11")
 endif()
 
@@ -88,7 +85,6 @@ project(${TESSERACT} C CXX)
 set(VERSION_MAJOR 3)
 set(VERSION_MINOR 05)
 set(VERSION_PLAIN "${VERSION_MAJOR}.${VERSION_MINOR}")
-
 
 include(LoadLibs)
 include(SourceGroups)
@@ -128,10 +124,6 @@ include_directories(liblept/src)
 # library settings
 ###############################################################################
 
-set(LIBRARY_TYPE SHARED)
-if (STATIC)
-	set(LIBRARY_TYPE)
-endif()
 file(GLOB HEADERS
 	"api/*.h"
 	"ccmain/*.h"
@@ -175,9 +167,19 @@ set(SOURCES ${SOURCES}
 	api/pdfrenderer.cpp
 )
 
-add_library(${TESSERACT} ${LIBRARY_TYPE} ${SOURCES} ${HEADERS})
-if (NOT STATIC)
-	target_compile_definitions(${TESSERACT} PUBLIC -DTESS_EXPORTS)
+if( NOT TESSERACT_LIBRARY_TYPE )
+	set(TESSERACT_LIBRARY_TYPE "SHARED")
+else()
+	set(TESSERACT_LIBRARY_TYPE "STATIC")
+endif()
+add_library(
+	${TESSERACT} ${TESSERACT_LIBRARY_TYPE} ${SOURCES} ${HEADERS})
+if( TESSERACT_LIBRARY_TYPE STREQUAL "SHARED" )
+	# Export all interfaces if we compile a shared library
+	set_target_properties(
+		${TESSERACT} PROPERTIES DEFINE_SYMBOL "TESS_EXPORTS")
+	# It's not working on Windows 7 x64 with MINGW64 (Removed!)
+	#target_compile_definitions(${TESSERACT} PUBLIC -DTESS_EXPORTS)
 endif()
 target_link_libraries(${TESSERACT} ${LEPTONICA} ${Ws2_32} ${pthread})
 
@@ -185,18 +187,15 @@ string(SUBSTRING ${VERSION_MINOR} 0 1 VERSION_MINOR_0)
 string(SUBSTRING ${VERSION_MINOR} 1 1 VERSION_MINOR_1)
 set_target_properties(${TESSERACT} PROPERTIES PREFIX "")
 set_target_properties(${TESSERACT} PROPERTIES VERSION 
-	${VERSION_MAJOR}.${VERSION_MINOR_0}.${VERSION_MINOR_1})
+	"${VERSION_MAJOR}.${VERSION_MINOR_0}.${VERSION_MINOR_1}")
 set_target_properties(${TESSERACT} PROPERTIES SOVERSION 
-	${VERSION_MAJOR}.${VERSION_MINOR_0}.${VERSION_MINOR_1})
-if(WIN32)
-	set_target_properties(
-		${TESSERACT} PROPERTIES OUTPUT_NAME ${TESSERACT})
+	"${VERSION_MAJOR}.${VERSION_MINOR_0}.${VERSION_MINOR_1}")
+set_target_properties(
+	${TESSERACT} PROPERTIES LIBRARY_OUTPUT_NAME ${TESSERACT})
+if( MSVC )
 	set_target_properties(
 		${TESSERACT} PROPERTIES COMPILE_PDB_NAME ${TESSERACT})
-	set_target_properties(
-		${TESSERACT} PROPERTIES DEBUG_OUTPUT_NAME '${TESSERACT}d')
 endif()
-#export(TARGETS ${TESSERACT} FILE ${CMAKE_BINARY_DIR}/TesseractTargets.cmake)
 
 
 
@@ -210,8 +209,10 @@ set(SOURCES
 	vs2010/tesseract/resource.h vs2010/tesseract/tesseract.rc
 )
 add_executable(${APPMAIN} ${SOURCES})
-target_link_libraries(${APPMAIN} ${TESSERACT})
+target_link_libraries(${APPMAIN} ${TESSERACT} ${pthread})
 set_target_properties(${APPMAIN} PROPERTIES OUTPUT_NAME ${TESSERACT})
+add_test(NAME appmain-help COMMAND appmain "--help")
+add_test(NAME appmain-version COMMAND appmain "--version")
 
 
 add_subdirectory(training)
