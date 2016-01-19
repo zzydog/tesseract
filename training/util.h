@@ -25,10 +25,8 @@
 #include <string>
 #include <vector>
 
-#ifdef USE_STD_NAMESPACE
 using std::string;
 using std::vector;
-#endif
 
 // StringHash is the hashing functor needed by the stl hash map.
 #ifndef COMPILER_MSVC
@@ -58,11 +56,6 @@ struct StringHash : public stdext::hash_compare <string> {
 };
 #endif  // !COMPILER_MSVC
 
-#ifndef USE_STD_NAMESPACE
-#include "base/heap-checker.h"
-#define DISABLE_HEAP_LEAK_CHECK HeapLeakChecker::Disabler disabler
-#else
 #define DISABLE_HEAP_LEAK_CHECK {}
-#endif
 
 #endif  // TESSERACT_TRAINING_UTIL_H_

@@ -32,10 +32,7 @@
 using namespace std;
 #endif
 
-#ifdef USE_STD_NAMESPACE
-using std::string;
-using std::vector;
-#endif
+using std::string; using std::vector;
 
 namespace tesseract {
 

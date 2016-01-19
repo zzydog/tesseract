@@ -50,36 +50,11 @@ configure_file(
 
 
 ###############################################################################
-# compiler and linker 
-###############################################################################
-
-if (CYGWIN)
-	add_definitions(-D__CYGWIN__)
-endif()
-
-if (MSVC)
-	add_definitions(-D_SCL_SECURE_NO_WARNINGS)
-	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /MP")
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
-endif()
-
-if (UNIX)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++11")
-endif()
-
-if (MINGW)
-	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} --std=c++11")
-endif()
-
-
-
-###############################################################################
 # project settings
 ###############################################################################
 
 if( NOT TESSERACT )
-	set(TESSERACT tesseract)
+    set(TESSERACT libtess)
 endif()
 project(${TESSERACT} C CXX)
 set(VERSION_MAJOR 3)
@@ -91,16 +66,15 @@ include(SourceGroups)
 include(BuildFunctions)
 
 if(WIN32)
-	set(Ws2_32 Ws2_32)
+    set(Ws2_32 Ws2_32)
 endif()
 if(UNIX)
-	set(pthread pthread)
+    set(pthread pthread)
 endif()
 
 add_definitions(-DHAVE_CONFIG_H)
 add_definitions(-DUSE_STD_NAMESPACE=1)
 add_definitions(-DWINDLLNAME="${TESSERACT}.dll")
-add_definitions(-D_SILENCE_STDEXT_HASH_DEPRECATION_WARNINGS=1)
 
 include_directories(api)
 include_directories(ccmain)
@@ -125,61 +99,59 @@ include_directories(liblept/src)
 ###############################################################################
 
 file(GLOB HEADERS
-	"api/*.h"
-	"ccmain/*.h"
-	"ccstruct/*.h"
-	"ccutil/*.h"
-	"classify/*.h"
-	"cube/*.h"
-	"cutil/*.h"
-	"dict/*.h"
-	"neural_networks/runtime/*.h"
-	"opencl/*.h"
-	"textord/*.h"
-	"viewer/*.h"
-	"wordrec/*.h"
+    "api/*.h"
+    "ccmain/*.h"
+    "ccstruct/*.h"
+    "ccutil/*.h"
+    "classify/*.h"
+    "cube/*.h"
+    "cutil/*.h"
+    "dict/*.h"
+    "neural_networks/runtime/*.h"
+    "opencl/*.h"
+    "textord/*.h"
+    "viewer/*.h"
+    "wordrec/*.h"
 )
 file(GLOB SOURCES
-	"ccmain/*.cpp"
-	"ccstruct/*.cpp"
-	"ccutil/*.cpp"
-	"classify/*.cpp"
-	"cube/*.cpp"
-	"cutil/*.cpp"
-	"dict/*.cpp"
-	"neural_networks/runtime/*.cpp"
-	"opencl/*.cpp"
-	"textord/*.cpp"
-	"viewer/*.cpp"
-	"wordrec/*.cpp"
+    "ccmain/*.cpp"
+    "ccstruct/*.cpp"
+    "ccutil/*.cpp"
+    "classify/*.cpp"
+    "cube/*.cpp"
+    "cutil/*.cpp"
+    "dict/*.cpp"
+    "neural_networks/runtime/*.cpp"
+    "opencl/*.cpp"
+    "textord/*.cpp"
+    "viewer/*.cpp"
+    "wordrec/*.cpp"
 )
-if (WIN32)
-	file(GLOB WIN32_HEADERS "vs2010/port/*.h")
-	file(GLOB WIN32_SOURCES "vs2010/port/*.cpp")
-	list(APPEND ${SOURCES} ${WIN32_SOURCES})
-	list(APPEND ${HEADERS} ${WIN32_HEADERS})
+if( WIN32 )
+    file(GLOB WIN32_HEADERS "vs2010/port/*.h")
+    file(GLOB WIN32_SOURCES "vs2010/port/*.cpp")
+    list(APPEND ${SOURCES} ${WIN32_SOURCES})
+    list(APPEND ${HEADERS} ${WIN32_HEADERS})
 endif()
 
 set(SOURCES ${SOURCES}
-	api/capi.cpp
-	api/baseapi.cpp
-	api/renderer.cpp
-	api/pdfrenderer.cpp
+    api/capi.cpp
+    api/baseapi.cpp
+    api/renderer.cpp
+    api/pdfrenderer.cpp
 )
 
 if( NOT TESSERACT_LIBRARY_TYPE )
-	set(TESSERACT_LIBRARY_TYPE "SHARED")
+    set(TESSERACT_LIBRARY_TYPE "SHARED")
 else()
-	set(TESSERACT_LIBRARY_TYPE "STATIC")
+    set(TESSERACT_LIBRARY_TYPE "STATIC")
 endif()
 add_library(
-	${TESSERACT} ${TESSERACT_LIBRARY_TYPE} ${SOURCES} ${HEADERS})
+    ${TESSERACT} ${TESSERACT_LIBRARY_TYPE} ${SOURCES} ${HEADERS})
 if( TESSERACT_LIBRARY_TYPE STREQUAL "SHARED" )
-	# Export all interfaces if we compile a shared library
-	set_target_properties(
-		${TESSERACT} PROPERTIES DEFINE_SYMBOL "TESS_EXPORTS")
-	# It's not working on Windows 7 x64 with MINGW64 (Removed!)
-	#target_compile_definitions(${TESSERACT} PUBLIC -DTESS_EXPORTS)
+    # Export all interfaces if compiling a shared library
+    target_compile_definitions(${TESSERACT} PRIVATE TESS_EXPORTS)
+    target_compile_definitions(${TESSERACT} INTERFACE TESS_IMPORTS)
 endif()
 target_link_libraries(${TESSERACT} ${LEPTONICA} ${Ws2_32} ${pthread})
 
@@ -187,14 +159,54 @@ string(SUBSTRING ${VERSION_MINOR} 0 1 VERSION_MINOR_0)
 string(SUBSTRING ${VERSION_MINOR} 1 1 VERSION_MINOR_1)
 set_target_properties(${TESSERACT} PROPERTIES PREFIX "")
 set_target_properties(${TESSERACT} PROPERTIES VERSION 
-	"${VERSION_MAJOR}.${VERSION_MINOR_0}.${VERSION_MINOR_1}")
+    "${VERSION_MAJOR}.${VERSION_MINOR_0}.${VERSION_MINOR_1}")
 set_target_properties(${TESSERACT} PROPERTIES SOVERSION 
-	"${VERSION_MAJOR}.${VERSION_MINOR_0}.${VERSION_MINOR_1}")
+    "${VERSION_MAJOR}.${VERSION_MINOR_0}.${VERSION_MINOR_1}")
 set_target_properties(
-	${TESSERACT} PROPERTIES LIBRARY_OUTPUT_NAME ${TESSERACT})
+    ${TESSERACT} PROPERTIES LIBRARY_OUTPUT_NAME ${TESSERACT})
 if( MSVC )
-	set_target_properties(
-		${TESSERACT} PROPERTIES COMPILE_PDB_NAME ${TESSERACT})
+    set_target_properties(
+        ${TESSERACT} PROPERTIES COMPILE_PDB_NAME ${TESSERACT})
+endif()
+
+# Compiler/Linker features on the target
+
+if( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX )
+    # Enable C++11 support
+    target_compile_options(${TESSERACT} PRIVATE -std=c++11)
+endif()
+
+if ( WIN32 )
+    target_compile_definitions(${TESSERACT} PRIVATE __WIN32__)
+endif()
+
+if (CYGWIN)
+    target_compile_definitions(${TESSERACT} PRIVATE __CYGWIN__)
+endif()
+
+if ( MSVC AND WIN32 )
+    # Enable Security Features
+    target_compile_options(${TESSERACT} PRIVATE /GS)
+    if (NOT ( MSVC_VERSION LESS 1900 ))
+        target_compile_options(${TESSERACT} PRIVATE /guard:cf)
+    endif()
+    if (NOT ( MSVC_VERSION LESS 1700 ))
+        target_compile_options(${TESSERACT} PRIVATE /sdl /analyze)
+    endif()
+    # Multiple Processes Building
+    if(MSVC_VERSION GREATER 1400)
+        set(PROCESSOR_COUNT "$ENV{NUMBER_OF_PROCESSORS}")
+        target_compile_options(${TESSERACT} PRIVATE "/MP${PROCESSOR_COUNT}")
+    endif()
+endif()
+
+if ( MINGW AND WIN32 )
+    # Enable Security Features
+    target_compile_options(${TESSERACT} PRIVATE -Wall)
+    target_compile_definitions(${TESSERACT} PRIVATE _FORTIFY_SOURCE=2)
+    target_compile_options(${TESSERACT} PRIVATE -fstack-protector-strong)
+    # Enable security APIs
+    target_compile_definitions(${TESSERACT} PRIVATE MINGW_HAS_SECURE_API)
 endif()
 
 
@@ -203,14 +215,14 @@ endif()
 # program settings
 ###############################################################################
 
-set(APPMAIN appmain)
+set(APPMAIN tesseract)
 set(SOURCES
-	api/tesseractmain.cpp 
-	vs2010/tesseract/resource.h vs2010/tesseract/tesseract.rc
+    api/tesseractmain.cpp 
+    vs2010/tesseract/resource.h vs2010/tesseract/tesseract.rc
 )
 add_executable(${APPMAIN} ${SOURCES})
 target_link_libraries(${APPMAIN} ${TESSERACT} ${pthread})
-set_target_properties(${APPMAIN} PROPERTIES OUTPUT_NAME ${TESSERACT})
+set_target_properties(${APPMAIN} PROPERTIES OUTPUT_NAME ${APPMAIN})
 add_test(NAME appmain-help COMMAND appmain "--help")
 add_test(NAME appmain-version COMMAND appmain "--version")
 

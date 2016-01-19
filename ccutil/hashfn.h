@@ -20,8 +20,6 @@
 #ifndef           HASHFN_H
 #define           HASHFN_H
 
-#ifdef USE_STD_NAMESPACE
-
 #if	defined(__cplusplus) && defined(_MSC_VER)	// Visual Studio
 	#if (_MSC_VER >= 1700)						// >= Visual c++ 2012
 		#include <unordered_map>
@@ -35,42 +33,32 @@
 		#define SmartPtr std::unique_ptr
 		using namespace std::tr1;
 	#else										// <  Visual c++ 2008
-		error "The compiler you use is obsoleted!"
-	#endif										// Visual Studio
-#elif defined(__cplusplus) && defined(__GNUC__)	// GCC Compiler
+		error "The compiler you use is obsolete!"
+	#endif										// is Visual Studio
+#elif defined(__cplusplus) && defined(__GNUC__)	// is GCC Compiler
 	#if (__GNUC__ >= 5)
 		#include <unordered_map>
 		#include <unordered_set>
 		using namespace std;
-	#elif ((__GNUC__ >= 4) && (__GNUC_MINOR__ >= 0))	
+	#elif ((__GNUC__ >= 4) && (__GNUC_MINOR__ >= 0))
 		#include <tr1/unordered_map>
 		#include <tr1/unordered_set>
 		using namespace std::tr1;
 	#else
-		error "The compiler you use is obsoleted!"
+		error "The compiler you use is obsolete!"
 	#endif
-#else
+#elif defined(__cplusplus) && defined(__clang__)// is Clang Compiler
+    #include <unordered_map>
+    #include <unordered_set>
+    using namespace std;
+#else                                           // Unknow C++ Compiler
 	#include <hash_map>
 	#include <hash_set>
 	#define unordered_map hash_map
 	#define unordered_set hash_set
 #endif  // gcc
-	
-#elif (__clang__)
-	
-#include <unordered_map>
-#include <unordered_set>
-using namespace std;
-	
-#else	// USE_STD_NAMESPACE
-	
-#include <hash_map>
-#include <hash_set>
-#define unordered_map hash_map
-#define unordered_set hash_set
-	
-#endif	// USE_STD_NAMESPACE
-
+    
+    
 #ifndef HAVE_UNIQUE_PTR
 // Trivial smart ptr. Expand to add features of std::unique_ptr as required.
 template<class T> class SmartPtr {

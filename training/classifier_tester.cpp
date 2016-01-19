@@ -17,9 +17,6 @@
 //  Author:   Ray Smith
 
 #include <stdio.h>
-#ifndef USE_STD_NAMESPACE
-#include "base/commandlineflags.h"
-#endif  // USE_STD_NAMESPACE
 #include "baseapi.h"
 #include "commontraining.h"
 #ifndef NO_CUBE_BUILD

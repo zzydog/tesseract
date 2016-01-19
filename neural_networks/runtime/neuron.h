@@ -12,9 +12,7 @@
 #include <math.h>
 #include <vector>
 
-#ifdef USE_STD_NAMESPACE
 using std::vector;
-#endif
 
 namespace tesseract {
 

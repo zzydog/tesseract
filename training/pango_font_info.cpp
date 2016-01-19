@@ -58,14 +58,8 @@ BOOL_PARAM_FLAG(fontconfig_refresh_config_file, true,
                 " multiple instances in separate processes without having to"
                 " rescan the fonts_dir, using a previously setup font cache");
 
-#ifndef USE_STD_NAMESPACE
-#include "ocr/trainingdata/typesetting/legacy_fonts.h"
-BOOL_PARAM_FLAG(use_only_legacy_fonts, false,
-                "Overrides --fonts_dir and sets the known universe of fonts to"
-                "the list in legacy_fonts.h");
-#else
+
 using std::pair;
-#endif
 
 namespace tesseract {
 
@@ -570,19 +564,6 @@ const vector<string>& FontUtils::ListAvailableFonts() {
   if (available_fonts_.size()) {
     return available_fonts_;
   }
-#ifndef USE_STD_NAMESPACE
-  if (FLAGS_use_only_legacy_fonts) {
-    // Restrict view to list of fonts in legacy_fonts.h
-    tprintf("Using list of legacy fonts only\n");
-    const int kNumFontLists = 4;
-    for (int i = 0; i < kNumFontLists; ++i) {
-      for (int j = 0; kFontlists[i][j] != NULL; ++j) {
-        available_fonts_.push_back(kFontlists[i][j]);
-      }
-    }
-    return available_fonts_;
-  }
-#endif
 
   PangoFontFamily** families = 0;
   int n_families = 0;

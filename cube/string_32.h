@@ -28,11 +28,9 @@
 #include <algorithm>
 #include <vector>
 
-#ifdef USE_STD_NAMESPACE
-using std::basic_string;
-using std::string;
 using std::vector;
-#endif
+using std::string;
+using std::basic_string;
 
 namespace tesseract {
 

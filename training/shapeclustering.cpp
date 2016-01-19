@@ -20,9 +20,6 @@
 #include "config_auto.h"
 #endif
 
-#ifndef USE_STD_NAMESPACE
-#include "base/commandlineflags.h"
-#endif
 #include "commontraining.h"
 #include "mastertrainer.h"
 #include "params.h"

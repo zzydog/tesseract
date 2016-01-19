@@ -38,12 +38,10 @@
 #include "unicode/uchar.h"  // from libicu
 #include "util.h"
 
-#ifdef USE_STD_NAMESPACE
 using std::map;
 using std::max;
 using std::min;
 using std::swap;
-#endif
 
 namespace tesseract {
 

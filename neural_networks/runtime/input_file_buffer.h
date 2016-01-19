@@ -11,9 +11,7 @@
 
 #include <stdio.h>
 #include <string>
-#ifdef USE_STD_NAMESPACE
 using std::string;
-#endif
 
 namespace tesseract {
 class InputFileBuffer {

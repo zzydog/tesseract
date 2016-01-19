@@ -19,7 +19,6 @@
 #ifndef TESSERACT_TRAINING_COMMANDLINEFLAGS_H_
 #define TESSERACT_TRAINING_COMMANDLINEFLAGS_H_
 
-#ifdef USE_STD_NAMESPACE
 
 #include <stdlib.h>
 #include "tprintf.h"
@@ -42,39 +41,18 @@
 #define DECLARE_STRING_PARAM_FLAG(name)         \
   extern STRING_VAR_H(FLAGS_##name, "", "")
 
-#else
-
-#include "base/commandlineflags.h"
-#define INT_PARAM_FLAG(name, val, comment) \
-  DEFINE_int32(name, val, comment)
-#define DECLARE_INT_PARAM_FLAG(name) \
-  DECLARE_int32(name)
-#define DOUBLE_PARAM_FLAG(name, val, comment) \
-  DEFINE_double(name, val, comment)
-#define DECLARE_DOUBLE_PARAM_FLAG(name) \
-  DECLARE_double(name)
-#define BOOL_PARAM_FLAG(name, val, comment) \
-  DEFINE_bool(name, val, comment)
-#define DECLARE_BOOL_PARAM_FLAG(name) \
-  DECLARE_bool(name)
-#define STRING_PARAM_FLAG(name, val, comment) \
-  DEFINE_string(name, val, comment)
-#define DECLARE_STRING_PARAM_FLAG(name) \
-  DECLARE_string(name)
-
-#endif
 
 namespace tesseract {
 
-// Parse commandline flags and values. Prints the usage string and exits on
-// input of --help or --helpshort.
+// Parse commandline flags and values. Prints the usage string and exits 
+// on input of --help or --helpshort.
 //
 // If remove_flags is true, the argv pointer is advanced so that (*argv)[1]
-// points to the first non-flag argument, (*argv)[0] points to the same string
-// as before, and argc is decremented to reflect the new shorter length of argv.
-// eg. If the input *argv is
-// { "program", "--foo=4", "--bar=true", "file1", "file2" } with *argc = 5, the
-// output *argv is { "program", "file1", "file2" } with *argc = 3
+// points to the first non-flag argument, (*argv)[0] points to the same 
+// string as before, and argc is decremented to reflect the new shorter 
+// length of argv. eg. If the input *argv is
+// { "program", "--foo=4", "--bar=true", "file1", "file2" } with *argc = 5, 
+// the output *argv is { "program", "file1", "file2" } with *argc = 3
 void ParseCommandLineFlags(const char* usage, int* argc,
                            char*** argv, const bool remove_flags);
 

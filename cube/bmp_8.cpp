@@ -24,10 +24,8 @@
 #include "bmp_8.h"
 #include "con_comp.h"
 #include "platform.h"
-#ifdef USE_STD_NAMESPACE
-using std::min;
-using std::max;
-#endif
+
+using std::min; using std::max;
 
 namespace tesseract {
 

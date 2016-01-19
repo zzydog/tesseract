@@ -25,9 +25,7 @@
 #define TUNING_PARAMS_H
 
 #include <string>
-#ifdef USE_STD_NAMESPACE
 using std::string;
-#endif
 
 namespace tesseract {
 class TuningParams {
